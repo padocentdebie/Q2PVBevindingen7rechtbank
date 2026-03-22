@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digitale Rechtszaal - Dossier Priscilla & Jack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBEod8zm1jvvkmPbe6cA_SQo2U_esC9yTY",
+            authDomain: "aangiftebotje.firebaseapp.com",
+            databaseURL: "https://aangiftebotje-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "aangiftebotje",
+            storageBucket: "aangiftebotje.firebasestorage.app",
+            messagingSenderId: "825633841222",
+            appId: "1:825633841222:web:15d93d08e2b719285dea47"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        window.login = function() {
+            const naam = document.getElementById('voornaam').value;
+            const klas = document.getElementById('klas').value;
+            const rol = document.getElementById('rol').value;
+            if(!naam) return alert("Vul je voornaam in");
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('court-room').classList.remove('hidden');
+            setupLiveFeed(klas, rol, naam);
+            setInstruction(rol);
+        };
+
+        function setInstruction(rol) {
+            const inst = {
+                'Advocaat': 'PLEIDOOI: Focus op gaten in het PV of verzachtende omstandigheden (bijv. de dronkenschap als incident) om Jack vrij te krijgen.',
+                'Officier': 'REQUISITOIR: Benadruk de snijwond, de rode striem en de hoge GRIS-score. Eis een onvoorwaardelijke straf en huisverbod.',
+                'Rechter': 'VONNIS: Weeg het bewijs van de aspirant en de getuige af tegen het pleidooi. Beslis over schuld en strafmaat.'
+            };
+            document.getElementById('rol-instructie').innerText = inst[rol];
+            document.getElementById('user-display').innerText = `Ambt: ${rol} | Gebruiker: ${document.getElementById('voornaam').value}`;
+        }
+
+        function setupLiveFeed(klas, rol, naam) {
+            const feedRef = ref(db, `rechtszaal/${klas}`);
+            document.getElementById('send-btn').onclick = () => {
+                const tekst = document.getElementById('input-tekst').value;
+                const entryRef = ref(db, `rechtszaal/${klas}/${rol}_${naam}`);
+                set(entryRef, { naam, rol, tekst, timestamp: Date.now() });
+                document.getElementById('input-tekst').value = '';
+            };
+            document.getElementById('reset-btn').onclick = () => {
+                if(confirm("Dossier van deze klas volledig wissen?")) remove(feedRef);
+            };
+            onValue(feedRef, (snapshot) => {
+                const data = snapshot.val();
+                const display = document.getElementById('live-feed-display');
+                display.innerHTML = '';
+                if(data) {
+                    Object.values(data).sort((a,b) => a.timestamp - b.timestamp).forEach(entry => {
+                        const div = document.createElement('div');
+                        div.className = `p-3 mb-2 rounded border-l-4 shadow-sm ${entry.rol === 'Rechter' ? 'border-purple-600 bg-purple-50' : entry.rol === 'Officier' ? 'border-red-600 bg-red-50' : 'border-blue-600 bg-blue-50'}`;
+                        div.innerHTML = `<span class="text-xs font-bold uppercase">${entry.rol} ${entry.naam}</span><p class="mt-1">${entry.tekst}</p>`;
+                        display.appendChild(div);
+                    });
+                }
+            });
+        }
+    </script>
+    <style>
+        body { background-color: #0f172a; font-family: 'Segoe UI', sans-serif; }
+        .scroll-box { height: 250px; overflow-y: auto; scrollbar-width: thin; }
+        .court-paper { background-color: #fffcf2; border: 1px solid #e5e7eb; color: #1f2937; }
+    </style>
+</head>
+<body class="p-2 md:p-6 text-slate-200">
+
+    <div id="login-screen" class="max-w-md mx-auto mt-20 bg-slate-800 p-8 rounded-lg shadow-2xl border-b-4 border-amber-600">
+        <h1 class="text-2xl font-serif font-bold mb-6 text-center text-amber-500 uppercase tracking-widest">Rechtbank Den Haag</h1>
+        <div class="space-y-4 text-slate-900">
+            <input type="text" id="voornaam" placeholder="Voornaam student" class="w-full p-3 rounded">
+            <select id="klas" class="w-full p-3 rounded">
+                <option value="Alpha">Klas Alpha</option><option value="Bravo">Klas Bravo</option>
+                <option value="Charlie">Klas Charlie</option><option value="Delta">Klas Delta</option>
+                <option value="Echo">Klas Echo</option><option value="Foxtrot">Klas Foxtrot</option>
+                <option value="Golf">Klas Golf</option><option value="Hotel">Klas Hotel</option>
+                <option value="Juliet">Klas Juliet</option><option value="Kilo">Klas Kilo</option>
+                <option value="Lima">Klas Lima</option>
+            </select>
+            <select id="rol" class="w-full p-3 rounded font-bold italic">
+                <option value="Advocaat">Inloggen als Advocaat</option>
+                <option value="Officier">Inloggen als Officier v. Justitie</option>
+                <option value="Rechter">Inloggen als Rechter</option>
+            </select>
+            <button onclick="login()" class="w-full bg-amber-600 text-white py-3 rounded font-bold hover:bg-amber-500 transition">OPEN DOSSIER</button>
+        </div>
+    </div>
+
+    <div id="court-room" class="hidden max-w-7xl mx-auto space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+            <h2 class="text-xl font-serif text-amber-500 uppercase italic" id="user-display"></h2>
+            <button id="reset-btn" class="text-xs bg-red-900 px-3 py-1 rounded hover:bg-red-700 transition">RESET KLAS</button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            
+            <div class="space-y-4 lg:col-span-1">
+                <div class="bg-slate-800 p-4 rounded-lg shadow-lg border border-slate-700">
+                    <h3 class="text-amber-500 font-bold mb-2 text-sm uppercase">1. PV van Bevindingen</h3>
+                    <div class="court-paper p-4 text-xs scroll-box rounded">
+                        <p>Op zondag 22 maart 2026 omstreeks 08:15 uur was ik, aspirant-agent van de Eenheid Den Haag, in uniform aan het werk voor de noodhulp in het centrum. Ik kreeg van de meldkamer de opdracht om direct naar de Vleerstraat 112 te rijden omdat daar een heftige ruzie tussen partners gaande was. Bij de woning zag ik dat de voordeur op een kier stond. Ik stapte naar binnen en hoorde meteen hard geschreeuw uit de woonkamer komen. In de gang zag ik scherven van een glazen deur op de grond liggen.<br><br>In de woonkamer zag ik Priscilla de Wit op de grond zitten. Ze trilde over haar hele lichaam en hield haar arm stevig vast terwijl de tranen over haar wangen liepen. Vlakbij haar stond Jack van den Berg in een grijs trainingspak. Hij balde zijn vuisten en ik rook een sterke alcohollucht om hem heen. Hij riep dat ik weg moest gaan en dat ik niets met hun privézaken te maken had.<br><br>Ik ging tussen hen in staan om de situatie te sussen. Priscilla keek me heel angstig aan en liet een diepe snee in haar arm zien waar bloed uit kwam. Ook zag ik een rode striem in haar nek. Op dat moment deed Jack een dreigende stap naar voren en begon hij weer te schreeuwen.<br><br>Om 08:28 uur besloot ik in te grijpen. Ik pakte Jack bij zijn arm en vertelde hem dat ik hem aanhield voor mishandeling. Ik legde hem direct de cautie uit. Hij stribbelde tegen, dus ik bracht zijn armen op zijn rug en legde de transportboeien aan. Om 08:40 uur droeg ik hem over voor vervoer naar de Hoefkade.</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 p-4 rounded-lg shadow-lg border border-slate-700">
+                    <h3 class="text-amber-500 font-bold mb-2 text-sm uppercase">2. Getuigenverklaring (Buurman)</h3>
+                    <div class="court-paper p-4 text-xs scroll-box rounded">
+                        <p>Getuige: Henk Grijpstra (Vleerstraat 110).<br><br>Verklaart: "Ik werd rond 08:00 uur wakker van harde klappen tegen de muur. Ik hoorde Jack schelden met een zware stem. Hij riep dat Priscilla nergens heen kon gaan. Daarna hoorde ik glas breken en een harde gil. Ik liep de galerij op en zag dat hun deur openstond. Ik hoorde Priscilla huilen en om hulp roepen. Omdat ik Jack ken als een agressieve man, durfde ik niet naar binnen en belde ik 112. Ik zie Jack vaker dronken thuiskomen en hoor vaker ruzies, maar dit klonk veel erger dan normaal."</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 p-4 rounded-lg shadow-lg border border-slate-700">
+                    <h3 class="text-amber-500 font-bold mb-2 text-sm uppercase">3. GRIS-SCAN (Risicoprofiel)</h3>
+                    <div class="court-paper p-4 text-xs scroll-box rounded font-mono">
+                        <p><strong>Dader:</strong> Jack van den Berg<br><strong>Score: HOOG RISICO</strong><br><br>
+                        [X] Fysiek geweld waargenomen (Snee/Striem)<br>
+                        [X] Middelengebruik (Alcoholgeur)<br>
+                        [X] Controle/Intimidatie (Dader verbiedt toegang)<br>
+                        [X] Getuigenverklaring duidt op escalatiepatroon<br>
+                        [ ] Wapenbezit (Geen)<br>
+                        [X] Gemoedstoestand slachtoffer: Doodsbang<br><br>
+                        Advies Agent: Directe verwijdering uit woning (Huisverbod) noodzakelijk wegens kans op herhaling binnen 24 uur.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 flex flex-col space-y-4">
+                <div class="bg-white rounded-lg shadow-inner flex-grow overflow-hidden flex flex-col" style="min-height: 500px;">
+                    <div class="bg-slate-700 p-3 text-white text-center font-serif italic uppercase text-sm">Openbare Zitting - Live Verslag</div>
+                    <div id="live-feed-display" class="flex-grow p-4 overflow-y-auto text-slate-900 space-y-3">
+                        </div>
+                </div>
+
+                <div class="bg-slate-800 p-6 rounded-lg border-t-4 border-amber-600">
+                    <p id="rol-instructie" class="text-amber-400 italic text-sm mb-3 font-bold"></p>
+                    <textarea id="input-tekst" rows="4" class="w-full p-3 rounded text-slate-900 border-none focus:ring-2 focus:ring-amber-500" placeholder="Schrijf uw pleidooi, eis of vonnis op basis van de bewijsstukken..."></textarea>
+                    <button id="send-btn" class="mt-3 w-full bg-amber-600 text-white py-3 rounded font-bold uppercase tracking-widest hover:bg-amber-500 transition shadow-lg">INDIENEN BIJ HET GERECHTSHOF</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
