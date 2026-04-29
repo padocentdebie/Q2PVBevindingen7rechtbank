@@ -66,7 +66,6 @@
                         div.innerHTML = `<span class="text-xs font-bold uppercase ${entry.rol === 'Rechter' ? 'text-purple-800' : entry.rol === 'Officier' ? 'text-red-800' : 'text-blue-800'}">${entry.rol} ${entry.naam}</span><p class="mt-1 text-slate-800 whitespace-pre-wrap">${entry.tekst}</p>`;
                         display.appendChild(div);
                     });
-                    // Auto-scroll naar beneden bij nieuwe berichten
                     display.scrollTop = display.scrollHeight;
                 }
             });
@@ -76,16 +75,7 @@
         body { background-color: #0f172a; font-family: 'Segoe UI', sans-serif; }
         .scroll-box { height: 200px; overflow-y: auto; scrollbar-width: thin; }
         .court-paper { background-color: #fffcf2; border: 1px solid #e5e7eb; color: #1f2937; }
-        
-        /* De 'meegroei' logica voor het centrale venster */
-        .live-feed-container { 
-            height: 60vh; /* Gebruikt 60% van de schermhoogte */
-            min-height: 400px;
-        }
-        #live-feed-display {
-            scrollbar-width: thin;
-            scrollbar-color: #94a3b8 #f1f5f9;
-        }
+        .live-feed-container { height: 60vh; min-height: 400px; }
     </style>
 </head>
 <body class="p-2 md:p-6 text-slate-200">
@@ -125,8 +115,11 @@
                         <span class="mr-2">📄</span> 1. PV van Bevindingen
                     </h3>
                     <div class="court-paper p-4 text-xs scroll-box rounded leading-relaxed">
-                        <p><strong>Datum:</strong> 22 maart 2026 | <strong>Locatie:</strong> Vleerstraat 112<br><br>
-                        Aspirant-agent Eenheid Den Haag ter plaatse na melding echtelijke ruzie. Voordeur op kier, scherven in gang. Priscilla de Wit trillend op de grond met diepe snee in arm en rode striem in nek. Jack van den Berg (grijs trainingspak) agressief, sterke alcohollucht. Jack aangehouden om 08:28 uur wegens mishandeling. Transportboeien aangelegd wegens verzet.</p>
+                        <p><strong>Datum:</strong> 22 maart 2026 | <strong>Tijd:</strong> 08:15 uur<br>
+                        <strong>Locatie:</strong> Vleerstraat 112, Den Haag<br><br>
+                        Ondergetekende, aspirant-agent van politie Eenheid Den Haag, kwam ter plaatse na een melding via de meldkamer betreffende een echtelijke ruzie. Bij aankomst trof ik de voordeur van de woning op een kier aan. In de gang nam ik glasscherven van een gebroken fotolijstje waar.<br><br>
+                        In de woonkamer trof ik mevrouw Priscilla de Wit aan, zittend op de grond. Zij verkeerde in een shocktoestand en trilde over haar hele lichaam. Ik nam een diepe bloedende snee waar aan haar rechter onderarm en een duidelijke rode striem in haar nek. Mevrouw verklaarde dat zij was geduwd en bij de keel was gegrepen.<br><br>
+                        Tevens trof ik de heer Jack van den Berg aan, gekleed in een grijs trainingspak. Hij gedroeg zich verbaal agressief en schreeuwde dat mevrouw 'niet zo moest zeiken'. Ik nam een sterke alcohollucht waar bij de heer Van den Berg. De heer Van den Berg is om 08:28 uur aangehouden op verdenking van mishandeling. Bij de aanhouding verzette hij zich fysiek, waarna transportboeien zijn aangelegd.</p>
                     </div>
                 </div>
 
@@ -135,22 +128,23 @@
                         <span class="mr-2">👂</span> 2. Getuigenverklaring
                     </h3>
                     <div class="court-paper p-4 text-xs scroll-box rounded">
-                        <p><strong>Getuige:</strong> H. Grijpstra (Buurman)<br><br>
-                        "Horde klappen tegen de muur en glas breken. Priscilla gilde om hulp. Jack staat bekend als agressief als hij gedronken heeft. Dit was extreem."</p>
+                        <p><strong>Getuige:</strong> H. Grijpstra (Buurman, wonend op Vleerstraat 110)<br><br>
+                        "Ik zat aan mijn ontbijt toen ik luid geschreeuw hoorde uit het huis van de buren. Het was geen gewone discussie; ik hoorde harde klappen tegen de muur en het geluid van brekend glas. Op een gegeven moment hoorde ik Priscilla heel hard om hulp gillen. Dat was voor mij het moment om direct 112 te bellen. Jack staat in de straat bekend als een agressieve man als hij gedronken heeft, maar dit klonk extremer dan normaal. Ik maak me oprecht zorgen om de veiligheid van die vrouw."</p>
                     </div>
                 </div>
 
                 <div class="bg-slate-800 p-4 rounded-lg shadow-lg border border-slate-700">
                     <h3 class="text-amber-500 font-bold mb-2 text-sm uppercase flex items-center">
-                        <span class="mr-2">📊</span> 3. GRIS-SCAN
+                        <span class="mr-2">📊</span> 3. GRIS-SCAN (Risicotaxatie)
                     </h3>
                     <div class="court-paper p-4 text-xs scroll-box rounded font-mono">
-                        <p class="text-red-700 font-bold border-b border-red-200 mb-2">SCORE: HOOG RISICO</p>
-                        [X] Fysiek geweld waargenomen<br>
-                        [X] Middelengebruik<br>
-                        [X] Escalatiepatroon<br>
-                        [X] Slachtoffer doodsbang<br><br>
-                        <strong>Advies:</strong> Direct huisverbod opleggen.
+                        <p class="text-red-700 font-bold border-b border-red-200 mb-2">SCORE: HOOG RISICO (ACUUT)</p>
+                        [X] Fysiek geweld waargenomen door politie<br>
+                        [X] Middelengebruik (Alcohol) vastgesteld bij dader<br>
+                        [X] Escalatiepatroon (getuigenverklaring bevestigt vaker geweld)<br>
+                        [X] Slachtoffer is doodsbang en vertoont letsel in nekregio<br>
+                        [X] Dader vertoont geen berouw tijdens aanhouding<br><br>
+                        <strong>Advies Veilig Thuis:</strong> Gezien de ernst van de striemen in de nek en de aanwezigheid van alcohol, adviseren wij direct een huisverbod op te leggen voor de duur van 10 dagen om de veiligheid van Priscilla de Wit te waarborgen.
                     </div>
                 </div>
             </div>
